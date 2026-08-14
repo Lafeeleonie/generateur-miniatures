@@ -13,9 +13,7 @@ if not exist ".venv\Scripts\python.exe" (
 
 ".venv\Scripts\python.exe" miniaturiseur.py --sortie xx_miniature.png
 if errorlevel 1 goto :erreur
-echo.
 echo Termine : xx_miniature.png
-pause
 exit /b 0
 
 :erreur

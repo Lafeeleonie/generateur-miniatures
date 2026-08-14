@@ -16,18 +16,18 @@ taille_titre = donnees["taille_titre"]
 taille_sous_titre = donnees["taille_sous_titre"]
 violet_principal = donnees["violet_principal"]
 violet_sombre = donnees["violet_sombre"]
+violet_contour = donnees["violet_contour"]
 noir = donnees["noir"]
 blanc = donnees["blanc"]
 
 # Reglages simples de positionnement : a modifier librement ici
-marge_haut = 100
+marge_haut = 600
 marge_bas = 80
 marge_cote = 60
-epaisseur_contour = 8
+epaisseur_contour = 4
 
 # Texte cree a partir des donnees du JSON
-titre = f"{classe} - +{cle}"
-sous_titre = ""
+titre = f"{classe}  —  M+ {cle}"
 
 # Le script prend le seul PNG source du dossier et ignore les miniatures deja creees.
 liste_png = [
@@ -51,8 +51,7 @@ elif fichier_otf.is_file():
 else:
     raise FileNotFoundError(f"Police introuvable : ajoutez {police}.ttf dans {dossier}.")
 
-font_titre = ImageFont.truetype(fichier_police, taille_titre)
-font_sous_titre = ImageFont.truetype(fichier_police, taille_sous_titre)
+font_titre = ImageFont.truetype(fichier_police, taille_sous_titre)
 
 # Titre centre en haut de l'image
 boite_titre = dessin.textbbox((0, 0), titre, font=font_titre, stroke_width=epaisseur_contour)
@@ -64,22 +63,8 @@ dessin.text(
     font=font_titre,
     fill=ImageColor.getrgb(violet_principal),
     stroke_width=epaisseur_contour,
-    stroke_fill=ImageColor.getrgb(noir),
+    stroke_fill=ImageColor.getrgb(violet_contour),
 )
-
-# Sous-titre facultatif : renseignez son texte dans la variable sous_titre ci-dessus.
-if sous_titre:
-    boite_sous_titre = dessin.textbbox((0, 0), sous_titre, font=font_sous_titre)
-    largeur_sous_titre = boite_sous_titre[2] - boite_sous_titre[0]
-    x_sous_titre = (image.width - largeur_sous_titre) // 2
-    y_sous_titre = y_titre + taille_titre + marge_cote
-    dessin.text(
-        (x_sous_titre, y_sous_titre), sous_titre,
-        font=font_sous_titre,
-        fill=ImageColor.getrgb(blanc),
-        stroke_width=epaisseur_contour // 2,
-        stroke_fill=ImageColor.getrgb(violet_sombre),
-    )
 
 fichier_sortie = dossier / "xx_miniature.png"
 image.save(fichier_sortie)

@@ -1,0 +1,11 @@
+{ 
+  "classe": "BDK",
+  "cle": 12,
+  "police": "Morpheus",
+  "taille_titre": 300,
+  "taille_sous_titre": 200,
+  "violet_principal": "#ff00ff",
+  "violet_sombre": "#6E2A8F",
+  "noir": "#0A0A0A",
+  "blanc": "#FFFFFF"
+}

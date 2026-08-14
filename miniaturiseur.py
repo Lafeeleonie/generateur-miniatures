@@ -1,83 +1,86 @@
-"""Crée une miniature PNG en utilisant les paramètres de donnee.json."""
-
-import argparse
 import json
 from pathlib import Path
 
 from PIL import Image, ImageColor, ImageDraw, ImageFont
 
-RACINE = Path(__file__).resolve().parent
-FICHIERS_A_IGNORER = {"xx_miniature.png"}
+# Lecture des donnees
+dossier = Path(__file__).resolve().parent
+with open(dossier / "donnee.json", encoding="utf-8") as fichier_json:
+    donnees = json.load(fichier_json)
 
+# Variables simples, toutes issues du JSON
+classe = donnees["classe"]
+cle = donnees["cle"]
+police = donnees["police"]
+taille_titre = donnees["taille_titre"]
+taille_sous_titre = donnees["taille_sous_titre"]
+violet_principal = donnees["violet_principal"]
+violet_sombre = donnees["violet_sombre"]
+noir = donnees["noir"]
+blanc = donnees["blanc"]
 
-def couleur(valeur: str) -> tuple[int, int, int, int]:
-    """Convertit une couleur HTML du JSON en couleur Pillow RGBA."""
-    return (*ImageColor.getrgb(valeur), 255)
+# Reglages simples de positionnement : a modifier librement ici
+marge_haut = 100
+marge_bas = 80
+marge_cote = 60
+epaisseur_contour = 8
 
+# Texte cree a partir des donnees du JSON
+titre = f"{classe} - +{cle}"
+sous_titre = ""
 
-def trouver_image() -> Path:
-    images = [
-        chemin for chemin in RACINE.glob("*.png")
-        if chemin.name.lower() not in FICHIERS_A_IGNORER
-        and not chemin.name.lower().endswith("_miniature.png")
-    ]
-    if len(images) != 1:
-        raise RuntimeError(
-            "Placez exactement un PNG source dans ce dossier "
-            "(les fichiers *_miniature.png sont ignorés)."
-        )
-    return images[0]
+# Le script prend le seul PNG source du dossier et ignore les miniatures deja creees.
+liste_png = [
+    fichier for fichier in dossier.glob("*.png")
+    if not fichier.name.lower().endswith("_miniature.png")
+]
+if len(liste_png) != 1:
+    raise RuntimeError("Placez exactement un PNG source dans ce dossier.")
 
+image_source = liste_png[0]
+image = Image.open(image_source).convert("RGBA")
+dessin = ImageDraw.Draw(image)
 
-def chemin_police(nom: str) -> Path:
-    """Trouve la police demandée, sans utiliser de substitution silencieuse."""
-    noms_acceptes = {f"{nom}.ttf".casefold(), f"{nom}.otf".casefold()}
-    for chemin in RACINE.iterdir():
-        if chemin.is_file() and chemin.name.casefold() in noms_acceptes:
-            return chemin
-    raise FileNotFoundError(
-        f"Police introuvable : placez {nom}.ttf (ou {nom}.otf) dans {RACINE}."
+# La police doit etre posee dans le dossier avec le script : Morpheus.ttf ou Morpheus.otf.
+fichier_ttf = dossier / f"{police}.ttf"
+fichier_otf = dossier / f"{police}.otf"
+if fichier_ttf.is_file():
+    fichier_police = fichier_ttf
+elif fichier_otf.is_file():
+    fichier_police = fichier_otf
+else:
+    raise FileNotFoundError(f"Police introuvable : ajoutez {police}.ttf dans {dossier}.")
+
+font_titre = ImageFont.truetype(fichier_police, taille_titre)
+font_sous_titre = ImageFont.truetype(fichier_police, taille_sous_titre)
+
+# Titre centre en haut de l'image
+boite_titre = dessin.textbbox((0, 0), titre, font=font_titre, stroke_width=epaisseur_contour)
+largeur_titre = boite_titre[2] - boite_titre[0]
+x_titre = (image.width - largeur_titre) // 2
+y_titre = marge_haut
+dessin.text(
+    (x_titre, y_titre), titre,
+    font=font_titre,
+    fill=ImageColor.getrgb(violet_principal),
+    stroke_width=epaisseur_contour,
+    stroke_fill=ImageColor.getrgb(noir),
+)
+
+# Sous-titre facultatif : renseignez son texte dans la variable sous_titre ci-dessus.
+if sous_titre:
+    boite_sous_titre = dessin.textbbox((0, 0), sous_titre, font=font_sous_titre)
+    largeur_sous_titre = boite_sous_titre[2] - boite_sous_titre[0]
+    x_sous_titre = (image.width - largeur_sous_titre) // 2
+    y_sous_titre = y_titre + taille_titre + marge_cote
+    dessin.text(
+        (x_sous_titre, y_sous_titre), sous_titre,
+        font=font_sous_titre,
+        fill=ImageColor.getrgb(blanc),
+        stroke_width=epaisseur_contour // 2,
+        stroke_fill=ImageColor.getrgb(violet_sombre),
     )
 
-
-def charger_police(chemin: Path, taille: int) -> ImageFont.FreeTypeFont:
-    return ImageFont.truetype(str(chemin), taille)
-
-
-def adapter_taille(draw: ImageDraw.ImageDraw, texte: str, police: ImageFont.FreeTypeFont,
-                    police_path: Path, largeur_max: int) -> ImageFont.FreeTypeFont:
-    taille = police.size
-    while taille > 20 and draw.textbbox((0, 0), texte, font=police, stroke_width=2)[2] > largeur_max:
-        taille -= 4
-        police = charger_police(police_path, taille)
-    return police
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Ajoute un titre à la miniature PNG.")
-    parser.add_argument("--sortie", default="xx_miniature.png", help="Nom du PNG créé.")
-    parser.add_argument("--titre", help="Titre à afficher (par défaut : classe + clé du JSON).")
-    args = parser.parse_args()
-
-    with (RACINE / "donnee.json").open(encoding="utf-8") as fichier:
-        donnees = json.load(fichier)
-
-    titre = args.titre or f"{donnees['classe']} - +{donnees['cle']}"
-    source = trouver_image()
-    image = Image.open(source).convert("RGBA")
-    dessin = ImageDraw.Draw(image)
-    police_path = chemin_police(donnees.get("police", "Morpheus"))
-    police = charger_police(police_path, int(donnees["taille_titre"]))
-    police = adapter_taille(dessin, titre, police, police_path, image.width - 120)
-
-    boite = dessin.textbbox((0, 0), titre, font=police, stroke_width=4)
-    x = (image.width - (boite[2] - boite[0])) // 2
-    y = image.height - (boite[3] - boite[1]) - 80
-    dessin.text((x, y), titre, font=police, fill=couleur(donnees["blanc"]),
-                stroke_width=8, stroke_fill=couleur(donnees["noir"]))
-    image.save(RACINE / args.sortie)
-    print(f"Miniature créée : {args.sortie} (source : {source.name}, titre : {titre})")
-
-
-if __name__ == "__main__":
-    main()
+fichier_sortie = dossier / "xx_miniature.png"
+image.save(fichier_sortie)
+print(f"Miniature creee : {fichier_sortie.name}")

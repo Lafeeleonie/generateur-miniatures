@@ -29,23 +29,27 @@ def trouver_image() -> Path:
     return images[0]
 
 
-def charger_police(nom: str, taille: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    candidats = [RACINE / f"{nom}.ttf", RACINE / f"{nom}.otf"]
-    candidats.extend([Path("C:/Windows/Fonts/arialbd.ttf"), Path("C:/Windows/Fonts/arial.ttf")])
-    for chemin in candidats:
-        if chemin.is_file():
-            return ImageFont.truetype(str(chemin), taille)
-    return ImageFont.load_default()
+def chemin_police(nom: str) -> Path:
+    """Trouve la police demandée, sans utiliser de substitution silencieuse."""
+    noms_acceptes = {f"{nom}.ttf".casefold(), f"{nom}.otf".casefold()}
+    for chemin in RACINE.iterdir():
+        if chemin.is_file() and chemin.name.casefold() in noms_acceptes:
+            return chemin
+    raise FileNotFoundError(
+        f"Police introuvable : placez {nom}.ttf (ou {nom}.otf) dans {RACINE}."
+    )
 
 
-def adapter_taille(draw: ImageDraw.ImageDraw, texte: str, police: ImageFont.FreeTypeFont | ImageFont.ImageFont,
-                    largeur_max: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    if not isinstance(police, ImageFont.FreeTypeFont):
-        return police
+def charger_police(chemin: Path, taille: int) -> ImageFont.FreeTypeFont:
+    return ImageFont.truetype(str(chemin), taille)
+
+
+def adapter_taille(draw: ImageDraw.ImageDraw, texte: str, police: ImageFont.FreeTypeFont,
+                    police_path: Path, largeur_max: int) -> ImageFont.FreeTypeFont:
     taille = police.size
     while taille > 20 and draw.textbbox((0, 0), texte, font=police, stroke_width=2)[2] > largeur_max:
         taille -= 4
-        police = charger_police("Morpheus", taille)
+        police = charger_police(police_path, taille)
     return police
 
 
@@ -62,8 +66,9 @@ def main() -> None:
     source = trouver_image()
     image = Image.open(source).convert("RGBA")
     dessin = ImageDraw.Draw(image)
-    police = charger_police(donnees.get("police", "Morpheus"), int(donnees["taille_titre"]))
-    police = adapter_taille(dessin, titre, police, image.width - 120)
+    police_path = chemin_police(donnees.get("police", "Morpheus"))
+    police = charger_police(police_path, int(donnees["taille_titre"]))
+    police = adapter_taille(dessin, titre, police, police_path, image.width - 120)
 
     boite = dessin.textbbox((0, 0), titre, font=police, stroke_width=4)
     x = (image.width - (boite[2] - boite[0])) // 2

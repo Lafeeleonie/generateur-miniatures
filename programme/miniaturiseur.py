@@ -67,17 +67,9 @@ def titre_video(fond, donnees):
     return f'{nom_donjon} +{donnees["cle"]} | {nom_classe} Tank POV | WoW Midnight M+'
 
 
-def description_video():
-    fichier_donjons = DOSSIER_PROGRAMME / "donjon.txt"
-    if not fichier_donjons.is_file():
-        return ""
-    lignes = fichier_donjons.read_text(encoding="utf-8").splitlines()
-    liens = [
-        ligne.strip()
-        for ligne in lignes
-        if "." in ligne.strip() and " " not in ligne.strip()
-    ]
-    return "\n".join(liens).replace(",", "\n")
+def description_video(donnees):
+    liens = donnees.get("lien_description", donnees.get("lien_desctiption", ""))
+    return "\n".join(lien.strip() for lien in liens.split(",") if lien.strip())
 
 
 class Application(tk.Tk):
@@ -148,14 +140,15 @@ class Application(tk.Tk):
         if fond is None:
             return
         try:
-            titre = titre_video(fond, charger_donnees())
+            donnees = charger_donnees()
+            titre = titre_video(fond, donnees)
         except Exception as erreur:
             messagebox.showerror("Erreur", str(erreur))
             return
         self.titre.delete(0, "end")
         self.titre.insert(0, titre)
         self.description.delete("1.0", "end")
-        self.description.insert("1.0", description_video())
+        self.description.insert("1.0", description_video(donnees))
 
     def copier(self, contenu):
         self.clipboard_clear()

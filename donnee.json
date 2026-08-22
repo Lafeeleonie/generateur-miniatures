@@ -1,6 +1,6 @@
 { 
-  "classe": "VDH",
-  "cle": 0,
+  "classe": "BDK",
+  "cle": 12,
   "police": "Morpheus",
   "taille_titre": 300,
   "taille_sous_titre": 160,
@@ -8,5 +8,6 @@
   "violet_sombre": "#6E2A8F",
   "violet_contour": "#19000d",
   "noir": "#0A0A0A",
-  "blanc": "#FFFFFF"
+  "blanc": "#FFFFFF",
+  "lien_desctiption": "twitch.tv/lafeeleonie, github.com/lafeeleonie, buymeacoffee.com/lafeeleonie"
 }

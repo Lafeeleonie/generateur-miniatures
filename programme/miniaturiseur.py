@@ -131,7 +131,7 @@ class Application(tk.Tk):
         tk.Label(cadre, text="Niveau de clé", font=("Segoe UI", 10, "bold"), bg="#1e1e1e", fg="#f0f0f0").pack(
             anchor="w", pady=(10, 0)
         )
-        self.cle = tk.StringVar(value="1")
+        self.cle = tk.StringVar(value=str(donnees_initiales.get("cle", 1)))
         self.entree_cle = tk.Spinbox(
             cadre,
             from_=1,
@@ -204,7 +204,6 @@ class Application(tk.Tk):
         try:
             donnees = charger_donnees()
             donnees["classe"] = self.classe_selectionnee.get()
-            self.cle.set(str(donnees.get("cle", 1)))
             self.actualiser_titre(donnees, fond)
         except Exception as erreur:
             messagebox.showerror("Erreur", str(erreur))
@@ -216,6 +215,7 @@ class Application(tk.Tk):
         if donnees is None:
             try:
                 donnees = charger_donnees()
+                donnees["classe"] = self.classe_selectionnee.get()
                 donnees["cle"] = self.cle.get()
             except (OSError, tk.TclError, ValueError):
                 return

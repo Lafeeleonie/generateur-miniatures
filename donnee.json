@@ -1,5 +1,11 @@
-{ 
-  "classe": "BDK",
+{
+  "classe": [
+    "BDK",
+    "VDH",
+    "PalProt",
+    "Brew"
+  ],
+  "classe_selectionnee": "PalProt",
   "cle": 12,
   "police": "Morpheus",
   "taille_titre": 300,
@@ -9,5 +15,16 @@
   "violet_contour": "#19000d",
   "noir": "#0A0A0A",
   "blanc": "#FFFFFF",
-  "lien_desctiption": "warcraftlogs.com/character/eu/elune/laf%c3%a9elyne?zone=55, twitch.tv/lafeeleonie, github.com/lafeeleonie, buymeacoffee.com/lafeeleonie"
+  "liens_personnages": {
+    "BDK": "https://fr.warcraftlogs.com/character/eu/elune/laf%c3%a9elyne?zone=55 (mon perso et talents)",
+    "VDH": "https://fr.warcraftlogs.com/character/id/95125370?zone=55 (mon perso et talents)",
+    "PalProt": "https://fr.warcraftlogs.com/character/id/12967779?zone=55 (mon perso et talents)",
+    "Brew": "https://fr.warcraftlogs.com/character/eu/elune/l%c3%a2f%c3%a9e?zone=55 (mon perso et talents)"
+  },
+  "liens_communs": [
+    "https://www.twitch.tv/lafeeleonie",
+    "https://www.curseforge.com/members/lafeeleonie/projects (mes addons)",
+    "https://www.github.com/lafeeleonie",
+    "https://www.buymeacoffee.com/lafeeleonie (supportez-moi)"
+  ]
 }

@@ -9,22 +9,23 @@ from PIL import Image, ImageColor, ImageDraw, ImageFont
 DOSSIER_PROGRAMME = Path(__file__).resolve().parent
 DOSSIER_RACINE = DOSSIER_PROGRAMME.parent
 DOSSIER_FONDS = DOSSIER_RACINE / "fond"
-NOMS_DONJONS = {
-    "altar_of_fangs": "Altar of Fangs",
-    "arena": "Voidscar Arena",
-    "blinding": "The Blinding Vale",
-    "kings": "Kings' Rest",
-    "murder": "Murder Row",
-    "nalorakk": "Den of Nalorakk",
-    "ruby": "Ruby Life Pools",
-    "setthraliss": "Temple of Sethraliss",
-}
 NOMS_CLASSES = {"BDK": "Blood DK"}
 
 
 def charger_donnees():
     with open(DOSSIER_RACINE / "donnee.json", encoding="utf-8") as fichier_json:
         return json.load(fichier_json)
+
+
+def charger_donjons():
+    with open(DOSSIER_RACINE / "donjon.json", encoding="utf-8") as fichier_json:
+        return json.load(fichier_json)
+
+
+def sauvegarder_donnees(donnees):
+    with open(DOSSIER_RACINE / "donnee.json", "w", encoding="utf-8") as fichier_json:
+        json.dump(donnees, fichier_json, ensure_ascii=False, indent=2)
+        fichier_json.write("\n")
 
 
 def charger_police(donnees):
@@ -61,15 +62,31 @@ def creer_miniature(fond, donnees, police):
     return fichier_sortie
 
 
-def titre_video(fond, donnees):
-    nom_donjon = NOMS_DONJONS.get(fond.stem, fond.stem.replace("_", " ").title())
+def titre_video(fond, donnees, noms_donjons=None):
+    if noms_donjons is None:
+        noms_donjons = charger_donjons()
+    nom_donjon = noms_donjons.get(fond.name, fond.stem.replace("_", " ").title())
     nom_classe = NOMS_CLASSES.get(donnees["classe"], donnees["classe"])
     return f'{nom_donjon} +{donnees["cle"]} | {nom_classe} Tank POV | WoW Midnight M+'
 
 
 def description_video(donnees):
-    liens = donnees.get("lien_description", donnees.get("lien_desctiption", ""))
-    return "\n".join(lien.strip() for lien in liens.split(",") if lien.strip())
+    liens_personnages = donnees.get("liens_personnages", {})
+    lien_personnage = liens_personnages.get(donnees["classe"], "")
+    liens_communs = donnees.get("liens_communs", [])
+
+    if isinstance(liens_communs, str):
+        liens_communs = liens_communs.split(",")
+
+    if not liens_personnages and not liens_communs:
+        liens = donnees.get("lien_description", donnees.get("lien_desctiption", ""))
+        return "\n".join(lien.strip() for lien in liens.split(",") if lien.strip())
+
+    return "\n".join(
+        lien.strip()
+        for lien in [lien_personnage, *liens_communs]
+        if lien and lien.strip()
+    )
 
 
 class Application(tk.Tk):
@@ -78,11 +95,55 @@ class Application(tk.Tk):
         self.title("Générateur de miniatures")
         self.resizable(False, False)
         self.configure(bg="#1e1e1e")
+        donnees_initiales = charger_donnees()
+        self.noms_donjons = charger_donjons()
+        classes = donnees_initiales.get("classe", [])
+        if isinstance(classes, str):
+            classes = [classes]
+        self.classes = classes
+        classe_selectionnee = donnees_initiales.get("classe_selectionnee", classes[0] if classes else "")
         self.fonds = sorted(DOSSIER_FONDS.glob("*.png"))
         self.fond_selectionne = tk.StringVar()
+        self.classe_selectionnee = tk.StringVar(value=classe_selectionnee)
 
         cadre = tk.Frame(self, padx=18, pady=18, bg="#1e1e1e")
         cadre.pack()
+        tk.Label(
+            cadre, text="Classe", font=("Segoe UI", 12, "bold"), bg="#1e1e1e", fg="#f0f0f0"
+        ).pack(anchor="w")
+        cadre_classes = tk.Frame(cadre, bg="#1e1e1e")
+        cadre_classes.pack(anchor="w")
+        for classe in classes:
+            tk.Radiobutton(
+                cadre_classes,
+                text=classe,
+                variable=self.classe_selectionnee,
+                value=classe,
+                command=self.actualiser_textes,
+                bg="#1e1e1e",
+                fg="#f0f0f0",
+                activebackground="#1e1e1e",
+                activeforeground="#ffffff",
+                selectcolor="#3a3a3a",
+            ).pack(side="left", padx=(0, 12))
+
+        tk.Label(cadre, text="Niveau de clé", font=("Segoe UI", 10, "bold"), bg="#1e1e1e", fg="#f0f0f0").pack(
+            anchor="w", pady=(10, 0)
+        )
+        self.cle = tk.IntVar(value=1)
+        self.entree_cle = tk.Spinbox(
+            cadre,
+            from_=1,
+            to=40,
+            width=5,
+            textvariable=self.cle,
+            bg="#2d2d2d",
+            fg="#f0f0f0",
+            insertbackground="#f0f0f0",
+        )
+        self.entree_cle.pack(anchor="w")
+        self.cle.trace_add("write", lambda *_: self.actualiser_titre())
+
         tk.Label(
             cadre, text="Donjon", font=("Segoe UI", 12, "bold"), bg="#1e1e1e", fg="#f0f0f0"
         ).pack(anchor="w")
@@ -90,7 +151,7 @@ class Application(tk.Tk):
         for fond in self.fonds:
             tk.Radiobutton(
                 cadre,
-                text=NOMS_DONJONS.get(fond.stem, fond.stem.replace("_", " ").title()),
+                text=self.noms_donjons.get(fond.name, fond.stem.replace("_", " ").title()),
                 variable=self.fond_selectionne,
                 value=fond.name,
                 command=self.actualiser_textes,
@@ -141,14 +202,28 @@ class Application(tk.Tk):
             return
         try:
             donnees = charger_donnees()
-            titre = titre_video(fond, donnees)
+            donnees["classe"] = self.classe_selectionnee.get()
+            self.cle.set(donnees.get("cle", 1))
+            self.actualiser_titre(donnees, fond)
         except Exception as erreur:
             messagebox.showerror("Erreur", str(erreur))
             return
-        self.titre.delete(0, "end")
-        self.titre.insert(0, titre)
         self.description.delete("1.0", "end")
         self.description.insert("1.0", description_video(donnees))
+
+    def actualiser_titre(self, donnees=None, fond=None):
+        if donnees is None:
+            try:
+                donnees = charger_donnees()
+                donnees["cle"] = self.cle.get()
+            except (OSError, tk.TclError, ValueError):
+                return
+        if fond is None:
+            fond = self.fond_choisi()
+        if fond is None:
+            return
+        self.titre.delete(0, "end")
+        self.titre.insert(0, titre_video(fond, donnees, self.noms_donjons))
 
     def copier(self, contenu):
         self.clipboard_clear()
@@ -163,13 +238,18 @@ class Application(tk.Tk):
 
         try:
             donnees = charger_donnees()
+            donnees["classe"] = self.classe_selectionnee.get()
+            donnees["cle"] = self.cle.get()
+            donnees["classe_selectionnee"] = donnees["classe"]
             police = charger_police(donnees)
             sortie = creer_miniature(fond, donnees, police)
+            donnees_a_sauvegarder = donnees.copy()
+            donnees_a_sauvegarder["classe"] = self.classes
+            sauvegarder_donnees(donnees_a_sauvegarder)
+            self.actualiser_titre(donnees, fond)
         except Exception as erreur:
             messagebox.showerror("Erreur", str(erreur))
             return
-
-        messagebox.showinfo("Terminé", f"Miniature créée :\n{sortie.name}")
 
 
 if __name__ == "__main__":

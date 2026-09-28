@@ -57,7 +57,8 @@ def creer_miniature(fond, donnees, police):
         stroke_fill=ImageColor.getrgb(donnees["violet_contour"]),
     )
 
-    fichier_sortie = DOSSIER_RACINE / f"{fond.stem}_miniature.png"
+    nom_classe = donnees["classe"].lower()
+    fichier_sortie = DOSSIER_RACINE / f"zz_{nom_classe}_{donnees['cle']}_{fond.stem}_miniature.png"
     image.save(fichier_sortie)
     return fichier_sortie
 

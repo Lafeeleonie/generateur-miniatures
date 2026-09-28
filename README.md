@@ -14,7 +14,7 @@ Double-cliquez sur `creer_miniature.bat`. Le script crée automatiquement l’en
 - `donjon.json` associe directement le nom exact d’un fichier de fond à son nom de donjon affiché. Pour ajouter ou renommer un donjon, modifiez ce fichier et placez le fond correspondant dans `fond/`.
 - Les fonds PNG et les miniatures générées ne sont pas suivis par Git.
 
-La miniature est enregistrée à la racine du projet avec le suffixe `_miniature.png`.
+La miniature est enregistrée à la racine du projet avec le préfixe `zz_`, afin d’apparaître à la fin du dossier. Son nom suit le format `zz_classe_niveau_donjon_miniature.png`.
 
 ## English
 
@@ -30,4 +30,4 @@ Double-click `creer_miniature.bat`. The script automatically creates the virtual
 - `donjon.json` directly maps the exact name of a background file to its displayed dungeon name. To add or rename a dungeon, edit this file and place the matching background in `fond/`.
 - PNG backgrounds and generated thumbnails are ignored by Git.
 
-The thumbnail is saved at the project root with the `_miniature.png` suffix.
+The thumbnail is saved at the project root with the `zz_` prefix so it appears at the end of the folder. Its name follows the `zz_class_level_dungeon_miniature.png` format.

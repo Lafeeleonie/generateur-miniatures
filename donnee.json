@@ -7,10 +7,22 @@
   ],
   "classe_selectionnee": "BDK",
   "noms_classes": {
-    "BDK": "Blood Death Knight (BDK)",
-    "VDH": "Vengeance Demon Hunter (VDH)",
-    "PalProt": "Protection Paladin (PalProt)",
-    "Brew": "Brewmaster Monk (Brew)"
+    "BDK": {
+      "nom": "Blood Death Knight (BDK)",
+      "role": "Tank"
+    },
+    "VDH": {
+      "nom": "Vengeance Demon Hunter (VDH)",
+      "role": "Tank"
+    },
+    "PalProt": {
+      "nom": "Protection Paladin (PalProt)",
+      "role": "Tank"
+    },
+    "Brew": {
+      "nom": "Brewmaster Monk (Brew)",
+      "role": "Tank"
+    }
   },
   "cle": 12,
   "police": "Morpheus",

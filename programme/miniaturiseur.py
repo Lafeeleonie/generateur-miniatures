@@ -67,8 +67,13 @@ def titre_video(fond, donnees, noms_donjons=None):
         noms_donjons = charger_donjons()
     nom_donjon = noms_donjons.get(fond.name, fond.stem.replace("_", " ").title())
     noms_classes = donnees.get("noms_classes", {})
-    nom_classe = noms_classes.get(donnees["classe"], donnees["classe"])
-    return f'{nom_donjon} +{donnees["cle"]} | {nom_classe} Tank POV | WoW Midnight M+'
+    classe = noms_classes.get(donnees["classe"], donnees["classe"])
+    if isinstance(classe, str):
+        nom_classe, role = classe, "Tank"
+    else:
+        nom_classe = classe.get("nom", donnees["classe"])
+        role = classe.get("role", "Tank")
+    return f'{nom_donjon} +{donnees["cle"]} | {nom_classe} {role} POV | WoW Midnight M+'
 
 
 def description_video(donnees):

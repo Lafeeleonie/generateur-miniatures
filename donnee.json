@@ -5,7 +5,13 @@
     "PalProt",
     "Brew"
   ],
-  "classe_selectionnee": "PalProt",
+  "classe_selectionnee": "BDK",
+  "noms_classes": {
+    "BDK": "Blood Death Knight (BDK)",
+    "VDH": "Vengeance Demon Hunter (VDH)",
+    "PalProt": "Protection Paladin (PalProt)",
+    "Brew": "Brewmaster Monk (Brew)"
+  },
   "cle": 12,
   "police": "Morpheus",
   "taille_titre": 300,

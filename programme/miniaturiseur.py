@@ -9,7 +9,6 @@ from PIL import Image, ImageColor, ImageDraw, ImageFont
 DOSSIER_PROGRAMME = Path(__file__).resolve().parent
 DOSSIER_RACINE = DOSSIER_PROGRAMME.parent
 DOSSIER_FONDS = DOSSIER_RACINE / "fond"
-NOMS_CLASSES = {"BDK": "Blood DK"}
 
 
 def charger_donnees():
@@ -67,7 +66,8 @@ def titre_video(fond, donnees, noms_donjons=None):
     if noms_donjons is None:
         noms_donjons = charger_donjons()
     nom_donjon = noms_donjons.get(fond.name, fond.stem.replace("_", " ").title())
-    nom_classe = NOMS_CLASSES.get(donnees["classe"], donnees["classe"])
+    noms_classes = donnees.get("noms_classes", {})
+    nom_classe = noms_classes.get(donnees["classe"], donnees["classe"])
     return f'{nom_donjon} +{donnees["cle"]} | {nom_classe} Tank POV | WoW Midnight M+'
 
 

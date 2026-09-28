@@ -10,7 +10,7 @@ Double-cliquez sur `creer_miniature.bat`. Le script crée automatiquement l’en
 
 ### Configuration
 
-- `donnee.json` contient les classes disponibles, la classe sélectionnée, le dernier niveau de clé utilisé, les couleurs et les liens de description.
+- `donnee.json` contient les classes disponibles, leur nom complet (`noms_classes`), la classe sélectionnée, le dernier niveau de clé utilisé, les couleurs et les liens de description.
 - `donjon.json` associe directement le nom exact d’un fichier de fond à son nom de donjon affiché. Pour ajouter ou renommer un donjon, modifiez ce fichier et placez le fond correspondant dans `fond/`.
 - Les fonds PNG et les miniatures générées ne sont pas suivis par Git.
 
@@ -26,7 +26,7 @@ Double-click `creer_miniature.bat`. The script automatically creates the virtual
 
 ### Configuration
 
-- `donnee.json` contains the available classes, the selected class, the last key level used, the colors, and the description links.
+- `donnee.json` contains the available classes, their full names (`noms_classes`), the selected class, the last key level used, the colors, and the description links.
 - `donjon.json` directly maps the exact name of a background file to its displayed dungeon name. To add or rename a dungeon, edit this file and place the matching background in `fond/`.
 - PNG backgrounds and generated thumbnails are ignored by Git.
 

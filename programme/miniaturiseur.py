@@ -209,6 +209,7 @@ class Application(tk.Tk):
         try:
             donnees = charger_donnees()
             donnees["classe"] = self.classe_selectionnee.get()
+            donnees["cle"] = self.cle.get()
             self.actualiser_titre(donnees, fond)
         except Exception as erreur:
             messagebox.showerror("Erreur", str(erreur))
